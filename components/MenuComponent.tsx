@@ -32,9 +32,17 @@ import {
   LogOut,
   User as UserIcon,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
-// Extended items for sidebar
+const COLORS = {
+  bg: "#12151a",
+  active: "#0B6A3B",
+  gold: "#f5e6c8",
+  mutedGold: "#d4c4a8",
+  hover: "#1a1a1b",
+  icon: "#a1b8cb",
+  leftBorder: "#963941",
+} as const;
+
 const sidebarItems = [
   {
     title: "Overview",
@@ -64,85 +72,141 @@ const sidebarItems = [
   },
 ];
 
-// Sidebar Component - For the actual sidebar content
 export function MenuComponent() {
   const pathname = usePathname();
-  const { open, state } = useSidebar();
-
-  // Shadcn sidebar uses 'state' for collapsible behavior
+  const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
-
-  // Mock logout function
-  const handleLogout = () => {
-    console.log("Logging out...");
-    // Add your logout logic here
-  };
 
   return (
     <Sidebar
       collapsible="icon"
-      className={cn(
-        "border-r flex flex-col transition-all duration-300",
+      className={`flex flex-col transition-all duration-300 ${
         isCollapsed ? "w-16" : "w-64"
-      )}
+      }`}
+      style={{
+        backgroundColor: COLORS.bg,
+        border: 0,
+      }}
     >
-      <SidebarHeader className="border-b p-0">
+      <SidebarHeader className="p-0" style={{ backgroundColor: COLORS.bg }}>
         <div
-          className={cn(
-            "flex items-center justify-between h-13",
+          className={`flex items-center justify-between h-13 ${
             isCollapsed ? "px-3" : "px-6"
-          )}
+          }`}
         >
           {!isCollapsed ? (
             <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold">A</span>
+              <div
+                className="h-8 w-8 rounded-lg flex items-center justify-center"
+                style={{ backgroundColor: COLORS.active }}
+              >
+                <span
+                  className="font-bold text-sm"
+                  style={{ color: COLORS.bg }}
+                >
+                  A
+                </span>
               </div>
               <div>
-                <h2 className="text-lg font-semibold">Acme Inc</h2>
-                <p className="text-xs text-muted-foreground">Admin Panel</p>
+                <h2
+                  className="text-lg font-semibold"
+                  style={{ color: COLORS.gold }}
+                >
+                  Acme Inc
+                </h2>
+                <p className="text-xs" style={{ color: COLORS.mutedGold }}>
+                  Admin Panel
+                </p>
               </div>
             </div>
           ) : (
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center mx-auto">
-              <span className="text-primary-foreground font-bold">A</span>
+            <div
+              className="h-8 w-8 rounded-lg flex items-center justify-center mx-auto"
+              style={{ backgroundColor: COLORS.active }}
+            >
+              <span className="font-bold text-sm" style={{ color: COLORS.bg }}>
+                A
+              </span>
             </div>
           )}
-
           <SidebarTrigger className="md:hidden" />
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="flex-1">
-        {/* Sidebar Menu Groups */}
+      <SidebarContent className="flex-1" style={{ backgroundColor: COLORS.bg }}>
         <div className="flex-1 overflow-auto py-4">
           {sidebarItems.map((group) => (
             <SidebarGroup key={group.title}>
               {!isCollapsed && (
-                <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
+                <SidebarGroupLabel
+                  className="uppercase text-xs font-medium mb-2"
+                  style={{ color: COLORS.mutedGold }}
+                >
+                  {group.title}
+                </SidebarGroupLabel>
               )}
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {group.items.map((item) => (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathname === item.href}
-                        tooltip={isCollapsed ? item.name : undefined}
-                      >
-                        <Link
-                          href={item.href}
-                          className={cn(
-                            "flex items-center gap-3",
-                            isCollapsed ? "justify-center" : ""
-                          )}
+                  {group.items.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <SidebarMenuItem key={item.href}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive}
+                          tooltip={isCollapsed ? item.name : undefined}
+                          className="transition-all duration-200 my-0.5"
+                          style={{
+                            backgroundColor: isActive
+                              ? COLORS.active
+                              : "transparent",
+                            color: isActive ? COLORS.bg : COLORS.gold,
+
+                            borderRadius: isActive ? "3px" : "0.5rem",
+
+                            // left indicator with top & bottom gap
+                            backgroundImage: isActive
+                              ? `linear-gradient(
+          to bottom,
+          transparent 8px,
+          ${COLORS.leftBorder} 8px,
+          ${COLORS.leftBorder} calc(100% - 8px),
+          transparent calc(100% - 8px)
+        )`
+                              : "none",
+                            backgroundRepeat: "no-repeat",
+                            backgroundSize: "3px 100%",
+                            backgroundPosition: "left center",
+                          }}
+                          onMouseEnter={(e) =>
+                            !isActive &&
+                            (e.currentTarget.style.backgroundColor =
+                              COLORS.hover)
+                          }
+                          onMouseLeave={(e) =>
+                            !isActive &&
+                            (e.currentTarget.style.backgroundColor =
+                              "transparent")
+                          }
                         >
-                          <item.icon className="h-4 w-4" />
-                          {!isCollapsed && <span>{item.name}</span>}
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
+                          <Link
+                            href={item.href}
+                            className={`flex items-center gap-3 ${
+                              isCollapsed ? "justify-center" : ""
+                            }`}
+                          >
+                            <item.icon
+                              className="h-4 w-4"
+                              style={{
+                                color: isActive ? COLORS.bg : COLORS.icon,
+                              }}
+                            />
+                            {!isCollapsed && <span>{item.name}</span>}
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -150,41 +214,70 @@ export function MenuComponent() {
         </div>
       </SidebarContent>
 
-      <SidebarFooter className="border-t p-3">
+      <SidebarFooter className="p-3" style={{ backgroundColor: COLORS.bg }}>
         <div className="space-y-3">
-          {/* User Info */}
           <div
-            className={cn(
-              "flex items-center",
-              isCollapsed ? "justify-center" : "gap-2"
-            )}
+            className={`flex items-center ${
+              isCollapsed ? "justify-center" : ""
+            }`}
           >
-            <div className="h-7 w-7 rounded-full bg-muted flex items-center justify-center">
-              <UserIcon className="h-3.5 w-3.5" />
+            <div
+              className="h-7 w-7 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: COLORS.hover }}
+            >
+              <UserIcon
+                className="h-3.5 w-3.5"
+                style={{ color: COLORS.icon }}
+              />
             </div>
             {!isCollapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium">John Doe</p>
-                <p className="text-xs text-muted-foreground">v2.1.4</p>
+              <div className="flex-1 min-w-0 ml-2">
+                <p
+                  className="text-sm font-medium truncate"
+                  style={{ color: COLORS.gold }}
+                >
+                  John Doe
+                </p>
+                <p
+                  className="text-xs truncate"
+                  style={{ color: COLORS.mutedGold }}
+                >
+                  v2.1.4
+                </p>
               </div>
             )}
           </div>
 
-          {/* Logout Button */}
           <Button
             variant="outline"
             size={isCollapsed ? "icon" : "sm"}
-            className={cn("w-full h-8", isCollapsed ? "" : "text-xs")}
-            onClick={handleLogout}
+            className="w-full h-8 transition-all duration-200 text-xs font-medium"
+            onClick={() => console.log("Logout")}
             title={isCollapsed ? "Logout" : ""}
+            style={{
+              backgroundColor: "transparent",
+              color: COLORS.gold,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = COLORS.hover;
+              e.currentTarget.style.borderColor = COLORS.active;
+              e.currentTarget.style.borderLeftColor = COLORS.leftBorder;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+              e.currentTarget.style.borderColor = COLORS.hover;
+              e.currentTarget.style.borderLeftColor = COLORS.leftBorder;
+            }}
           >
-            <LogOut className={cn("h-3 w-3", !isCollapsed && "mr-2")} />
+            <LogOut className={`h-3 w-3 ${!isCollapsed ? "mr-2" : ""}`} />
             {!isCollapsed && "Logout"}
           </Button>
 
-          {/* Copyright */}
           {!isCollapsed && (
-            <p className="text-xs text-center text-muted-foreground">
+            <p
+              className="text-xs text-center pt-2"
+              style={{ color: COLORS.mutedGold }}
+            >
               © 2024 Acme Inc
             </p>
           )}

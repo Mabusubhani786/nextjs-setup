@@ -18,7 +18,7 @@ export default function MainLayout({
         <div className="flex-1 flex flex-col overflow-hidden">
           <HeaderComponent />
           <main className="flex-1 overflow-auto">
-            <div className="container mx-auto px-4 py-8">{children}</div>
+            <div className="container p-3">{children}</div>
           </main>
         </div>
       </div>
